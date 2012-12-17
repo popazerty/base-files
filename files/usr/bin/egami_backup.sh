@@ -20,6 +20,11 @@ NANDDUMP=/usr/bin/nanddump
 WORKDIR=$DIRECTORY/bi
 TARGET="XX"
 
+if [ ! -f /usr/lib/libbz2.so.1.0 ] ; then
+	#hack
+	cp /usr/lib/libbz2.so.0 /usr/lib/libbz2.so.1.0
+fi
+
 if [ -f /proc/stb/info/boxtype ] ; then
 	#MODEL=$( cat /proc/stb/info/boxtype )
 	MODEL=venton-hdx
@@ -77,7 +82,7 @@ $UBINIZE -o $WORKDIR/root.ubifs $UBINIZE_ARGS $WORKDIR/ubinize.cfg
 chmod 644 $WORKDIR/root.$ROOTFSTYPE
 
 echo "Create: kerneldump"
-nanddump /dev/mtd1 -o -b > $WORKDIR/vmlinux.gz
+$NANDDUMP /dev/mtd1 -o -b > $WORKDIR/vmlinux.gz
 
 echo " "
 echo "Almost there... Now building the USB-Image!"
@@ -89,8 +94,10 @@ if [ $TYPE = "INI" ] ; then
 	mkdir -p $EXTRA/$MODEL
 	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
 	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
+	touch noforce $MAINDEST/
 	cp -r $MAINDEST $EXTRA #copy the made back-up to images
-	cp -r /etc/version $EXTRA/$MODEL/imageversion	
+	cp -r /etc/version $EXTRA/$MODEL/imageversion
+	touch $EXTRA/$MODEL/noforce
 	cd $EXTRA
 	zip $DIRECTORY/EGAMI_fullbackup_$MODEL/egami-$MODEL-image-$DATE-usb.zip $MODEL/*
 	if [ -f $MAINDEST/rootfs.bin -a -f $MAINDEST/kernel.bin ] ; then
