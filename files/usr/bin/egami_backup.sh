@@ -2,8 +2,9 @@
 #                      FULL BACKUP UYILITY FOR  VU+                           #
 #        Tools original by scope34 with additions by Dragon48 & DrData        #
 #               modified by Pedro_Newbie (pedro.newbie@gmail.com)             #
-#                              modified by EGAMI  			      #
-#				for UNiBOX		                      #
+#                              modified by EGAMI  			        #
+#				for UNiBOX					#
+#				14.02.2013					#
 ###############################################################################
 #
 #!/bin/sh
@@ -27,7 +28,11 @@ fi
 
 if [ -f /proc/stb/info/boxtype ] ; then
 	#MODEL=$( cat /proc/stb/info/boxtype )
-	MODEL=venton-hdx
+	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000R' ]; then
+		MODEL=hdx
+	else
+		MODEL=venton-hdx
+	fi
 	TYPE=INI
 	MKUBIFS_ARGS="-m 2048 -e 126976 -c 4096"
 	UBINIZE_ARGS="-m 2048 -p 128KiB"
