@@ -4,7 +4,7 @@
 #               modified by Pedro_Newbie (pedro.newbie@gmail.com)             #
 #                              modified by EGAMI  			        #
 #				for UNiBOX					#
-#				14.02.2013					#
+#				16.04.2013					#
 ###############################################################################
 #
 #!/bin/sh
@@ -27,13 +27,31 @@ if [ ! -f /usr/lib/libbz2.so.1.0 ] ; then
 fi
 
 if [ -f /proc/stb/info/boxtype ] ; then
-	#MODEL=$( cat /proc/stb/info/boxtype )
-	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000R' ]; then
+	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000ru' ]; then
+		TYPE=INI
 		MODEL=hdx
+		MTD=mtd1
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000sv' ]; then
+		TYPE=twin
+		MODEL=miraclebox
+		MTD=mtd1
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000ru' ]; then
+		TYPE=INI
+		MODEL=hde
+		MTD=mtd2
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000sv' ]; then
+		TYPE=mini
+		MODEL=miraclebox
+		MTD=mtd2
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000' ]; then
+		TYPE=INI
+		MODEL=venton-hde
+		MTD=mtd2
 	else
+		TYPE=INI
 		MODEL=venton-hdx
+		MTD=mtd1
 	fi
-	TYPE=INI
 	MKUBIFS_ARGS="-m 2048 -e 126976 -c 4096"
 	UBINIZE_ARGS="-m 2048 -p 128KiB"
 	SHOWNAME="$MODEL"
@@ -87,7 +105,7 @@ $UBINIZE -o $WORKDIR/root.ubifs $UBINIZE_ARGS $WORKDIR/ubinize.cfg
 chmod 644 $WORKDIR/root.$ROOTFSTYPE
 
 echo "Create: kerneldump"
-$NANDDUMP /dev/mtd1 -o -b > $WORKDIR/vmlinux.gz
+$NANDDUMP /dev/$MTD -o -b > $WORKDIR/vmlinux.gz
 
 echo " "
 echo "Almost there... Now building the USB-Image!"
@@ -120,7 +138,7 @@ if [ $TYPE = "INI" ] ; then
 		echo "-> no space left on back-up device"
 		echo "-> no writing permission on back-up device"
 		echo " "
-	fi
+	fi	
 fi
 
 rm -rf $MAINDEST
