@@ -4,7 +4,7 @@
 #               modified by Pedro_Newbie (pedro.newbie@gmail.com)             #
 #                              modified by EGAMI  			        #
 #				for UNiBOX					#
-#				16.04.2013					#
+#				09.07.2013					#
 ###############################################################################
 #
 #!/bin/sh
@@ -21,6 +21,9 @@ NANDDUMP=/usr/bin/nanddump
 WORKDIR=$DIRECTORY/bi
 TARGET="XX"
 
+MKUBIFS_ARGS="-m 2048 -e 126976 -c 4096"
+UBINIZE_ARGS="-m 2048 -p 128KiB"
+	
 if [ ! -f /usr/lib/libbz2.so.1.0 ] ; then
 	#hack
 	cp /usr/lib/libbz2.so.0 /usr/lib/libbz2.so.1.0
@@ -28,32 +31,37 @@ fi
 
 if [ -f /proc/stb/info/boxtype ] ; then
 	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000ru' ]; then
-		TYPE=INI
+		TYPE=sezam
 		MODEL=hdx
 		MTD=mtd1
-	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000sv' ]; then
-		TYPE=twin
-		MODEL=miraclebox
-		MTD=mtd1
 	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000ru' ]; then
-		TYPE=INI
+		TYPE=sezam
 		MODEL=hde
 		MTD=mtd2
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000sv' ]; then
+		TYPE=miraclebox
+		MODEL=mbtwin
+		MTD=mtd1
 	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000sv' ]; then
-		TYPE=mini
-		MODEL=miraclebox
+		TYPE=miraclebox
+		MODEL=mbmini
+		MTD=mtd2
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000de' ]; then
+		TYPE=gm
+		MODEL=xpeedlx
 		MTD=mtd2
 	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000' ]; then
-		TYPE=INI
+		TYPE=venton
 		MODEL=venton-hde
 		MTD=mtd2
-	else
-		TYPE=INI
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-3000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-7000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-7012' ]; then
+		TYPE=venton
 		MODEL=venton-hdx
 		MTD=mtd1
+	else
+		echo "No supported receiver found!"
+		exit 0
 	fi
-	MKUBIFS_ARGS="-m 2048 -e 126976 -c 4096"
-	UBINIZE_ARGS="-m 2048 -p 128KiB"
 	SHOWNAME="$MODEL"
 	MAINDEST=$DIRECTORY/$MODEL
 	EXTRA=$DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE
@@ -110,35 +118,36 @@ $NANDDUMP /dev/$MTD -o -b > $WORKDIR/vmlinux.gz
 echo " "
 echo "Almost there... Now building the USB-Image!"
 
-## HANDLING THE INI SERIES
-if [ $TYPE = "INI" ] ; then
-	rm -rf $MAINDEST
-	mkdir -p $MAINDEST
-	mkdir -p $EXTRA/$MODEL
-	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
-	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
-	touch noforce $MAINDEST/
-	cp -r $MAINDEST $EXTRA #copy the made back-up to images
-	cp -r /etc/version $EXTRA/$MODEL/imageversion
-	touch $EXTRA/$MODEL/noforce
-	cd $EXTRA
-	zip $DIRECTORY/EGAMI_fullbackup_$MODEL/egami-$MODEL-image-$DATE-usb.zip $MODEL/*
-	if [ -f $MAINDEST/rootfs.bin -a -f $MAINDEST/kernel.bin ] ; then
-		echo " "
-		echo "ZIP USB Image created in:";echo $EXTRA
-		echo " "
-		echo "To restore the image:"
-		echo "Place the USB-flash drive in the (front) USB-port and switch the receiver off and on with the powerswitch on the back of the receiver."
-		echo "Follow the instructions on the front-display."
-		echo "Please wait.... almost ready!"
+if [ $TYPE = "miraclebox" ] ; then
+	MAINDEST=$DIRECTORY/$TYPE/$MODEL
+fi
 
-	else
-		echo "Image creation FAILED!"
-		echo "Probable causes could be:"
-		echo "-> no space left on back-up device"
-		echo "-> no writing permission on back-up device"
-		echo " "
-	fi	
+rm -rf $MAINDEST
+mkdir -p $MAINDEST
+mkdir -p $EXTRA/$MODEL
+mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
+mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
+touch noforce $MAINDEST/
+cp -r $MAINDEST $EXTRA #copy the made back-up to images
+cp -r /etc/version $EXTRA/$MODEL/imageversion
+touch $EXTRA/$MODEL/noforce
+cd $EXTRA
+zip $DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE/egami-$MODEL-image-$DATE-usb.zip $MODEL/*
+if [ -f $MAINDEST/rootfs.bin -a -f $MAINDEST/kernel.bin ] ; then
+	echo " "
+	echo "ZIP USB Image created in:";echo $EXTRA
+	echo " "
+	echo "To restore the image:"
+	echo "Place the USB-flash drive in the (front) USB-port and switch the receiver off and on with the powerswitch on the back of the receiver."
+	echo "Follow the instructions on the front-display."
+	echo "Please wait.... almost ready!"
+
+else
+	echo "Image creation FAILED!"
+	echo "Probable causes could be:"
+	echo "-> no space left on back-up device"
+	echo "-> no writing permission on back-up device"
+	echo " "
 fi
 
 rm -rf $MAINDEST
