@@ -119,20 +119,35 @@ echo " "
 echo "Almost there... Now building the USB-Image!"
 
 if [ $TYPE = "miraclebox" ] ; then
+	echo "Detected Miraclebox, creating miraclbox dir"
 	MAINDEST=$DIRECTORY/$TYPE/$MODEL
 fi
 
 rm -rf $MAINDEST
 mkdir -p $MAINDEST
-mkdir -p $EXTRA/$MODEL
-mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
-mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
-touch noforce $MAINDEST/
-cp -r $MAINDEST $EXTRA #copy the made back-up to images
-cp -r /etc/version $EXTRA/$MODEL/imageversion
-touch $EXTRA/$MODEL/noforce
-cd $EXTRA
-zip $DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE/egami-$MODEL-image-$DATE-usb.zip $MODEL/*
+
+if [ $TYPE = "miraclebox" ] ; then
+	mkdir -p $EXTRA/$TYPE/$MODEL
+	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
+	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
+	touch noforce $MAINDEST/
+	cp -r $MAINDEST $EXTRA/$TYPE #copy the made back-up to images
+	cp -r /etc/version $EXTRA/$TYPE/$MODEL/imageversion
+	touch $EXTRA/$TYPE/$MODEL/noforce
+	cd $EXTRA
+	zip $DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE/egami-$MODEL-image-$DATE-usb.zip $TYPE/$MODEL/*
+else
+	mkdir -p $EXTRA/$MODEL
+	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
+	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
+	touch noforce $MAINDEST/
+	cp -r $MAINDEST $EXTRA #copy the made back-up to images
+	cp -r /etc/version $EXTRA/$MODEL/imageversion
+	touch $EXTRA/$MODEL/noforce
+	cd $EXTRA
+	zip $DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE/egami-$MODEL-image-$DATE-usb.zip $MODEL/*
+fi
+
 if [ -f $MAINDEST/rootfs.bin -a -f $MAINDEST/kernel.bin ] ; then
 	echo " "
 	echo "ZIP USB Image created in:";echo $EXTRA
