@@ -4,7 +4,7 @@
 #               modified by Pedro_Newbie (pedro.newbie@gmail.com)             #
 #                              modified by EGAMI  			        #
 #				for UNiBOX					#
-#				09.07.2013					#
+#				24.09.2013					#
 ###############################################################################
 #
 #!/bin/sh
@@ -50,6 +50,12 @@ if [ -f /proc/stb/info/boxtype ] ; then
 		TYPE=gm
 		MODEL=xpeedlx
 		MTD=mtd2
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-9000de' ]; then
+		TYPE=gm
+		MODEL=xpeedlx3
+		MTD=mtd2
+		MKUBIFS_ARGS="-m 4096 -e 1040384 -c 1984"
+		UBINIZE_ARGS="-m 4096 -p 1024KiB"
 	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000' ]; then
 		TYPE=venton
 		MODEL=venton-hde
