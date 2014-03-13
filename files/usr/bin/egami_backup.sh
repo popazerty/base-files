@@ -3,8 +3,8 @@
 #        Tools original by scope34 with additions by Dragon48 & DrData        #
 #               modified by Pedro_Newbie (pedro.newbie@gmail.com)             #
 #                              modified by EGAMI  			        #
-#				for UNiBOX					#
-#				24.09.2013					#
+#				for INI_OEM					#
+#				13.03.2014					#
 ###############################################################################
 #
 #!/bin/sh
@@ -30,7 +30,13 @@ if [ ! -f /usr/lib/libbz2.so.1.0 ] ; then
 fi
 
 if [ -f /proc/stb/info/boxtype ] ; then
-	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000ru' ]; then
+	if [ "$(cat /proc/stb/info/boxtype)" == 'ini-9000ru' ]; then
+		TYPE=sezam
+		MODEL=marvel
+		MTD=mtd2
+		MKUBIFS_ARGS="-m 4096 -e 1040384 -c 1984"
+		UBINIZE_ARGS="-m 4096 -p 1024KiB"
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000ru' ]; then
 		TYPE=sezam
 		MODEL=hdx
 		MTD=mtd1
@@ -46,7 +52,7 @@ if [ -f /proc/stb/info/boxtype ] ; then
 		TYPE=miraclebox
 		MODEL=mbmini
 		MTD=mtd2
-	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000de' ]; then
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000de' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000lx' ]; then
 		TYPE=gm
 		MODEL=xpeedlx
 		MTD=mtd2
@@ -56,9 +62,9 @@ if [ -f /proc/stb/info/boxtype ] ; then
 		MTD=mtd2
 		MKUBIFS_ARGS="-m 4096 -e 1040384 -c 1984"
 		UBINIZE_ARGS="-m 4096 -p 1024KiB"
-	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000' ]; then
-		TYPE=venton
-		MODEL=venton-hde
+	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-1000am' ]; then
+		TYPE=atemio
+		MODEL=5x00
 		MTD=mtd2
 	elif [ "$(cat /proc/stb/info/boxtype)" == 'ini-3000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-5000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-7000' ] || [ "$(cat /proc/stb/info/boxtype)" == 'ini-7012' ]; then
 		TYPE=venton
@@ -133,6 +139,16 @@ rm -rf $MAINDEST
 mkdir -p $MAINDEST
 
 if [ $TYPE = "miraclebox" ] ; then
+	mkdir -p $EXTRA/$TYPE/$MODEL
+	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
+	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
+	touch noforce $MAINDEST/
+	cp -r $MAINDEST $EXTRA/$TYPE #copy the made back-up to images
+	cp -r /etc/version $EXTRA/$TYPE/$MODEL/imageversion
+	touch $EXTRA/$TYPE/$MODEL/noforce
+	cd $EXTRA
+	zip $DIRECTORY/EGAMI_fullbackup_$MODEL/$DATE/egami-$MODEL-image-$DATE-usb.zip $TYPE/$MODEL/*
+elif [ $TYPE = "atemio" ] ; then
 	mkdir -p $EXTRA/$TYPE/$MODEL
 	mv $WORKDIR/root.ubifs $MAINDEST/rootfs.bin
 	mv $WORKDIR/vmlinux.gz $MAINDEST/kernel.bin
