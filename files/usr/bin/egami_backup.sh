@@ -125,7 +125,7 @@ $UBINIZE -o $WORKDIR/root.ubifs $UBINIZE_ARGS $WORKDIR/ubinize.cfg
 chmod 644 $WORKDIR/root.$ROOTFSTYPE
 
 echo "Create: kerneldump"
-$NANDDUMP /dev/$MTD -o -b > $WORKDIR/vmlinux.gz
+$NANDDUMP /dev/$MTD -o > $WORKDIR/vmlinux.gz
 
 echo " "
 echo "Almost there... Now building the USB-Image!"
